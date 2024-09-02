@@ -1,5 +1,7 @@
 # [./no_more_politics_please.sh](https://nomorepoliticsplease.com)
 
+![Chrome Web Store Status](https://img.shields.io/badge/Chrome%20Web%20Store-Under%20Review-yellow)
+
 ## Hack the system, remove the noise
 
 Are you tired of endless political debates cluttering your X feed? Say goodbye to unwanted political content!
