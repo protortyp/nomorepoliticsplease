@@ -77,42 +77,48 @@ function waitForTweetsToLoad(callback, maxAttempts = 10, interval = 1000) {
   checkTweets();
 }
 
-waitForTweetsToLoad(processTweets);
+function initializeExtension() {
+  waitForTweetsToLoad(processTweets);
 
-const observer = new MutationObserver((mutations) => {
-  let shouldProcess = false;
+  const observer = new MutationObserver((mutations) => {
+    let shouldProcess = false;
 
-  mutations.forEach((mutation) => {
-    if (mutation.type === "childList") {
-      mutation.addedNodes.forEach((node) => {
-        if (
-          node.nodeType === Node.ELEMENT_NODE &&
-          (node.matches('article[data-testid="tweet"]') ||
-            node.querySelector('article[data-testid="tweet"]'))
-        ) {
-          shouldProcess = true;
-        }
-      });
-    } else if (mutation.type === "attributes") {
-      shouldProcess = true;
+    mutations.forEach((mutation) => {
+      if (mutation.type === "childList") {
+        mutation.addedNodes.forEach((node) => {
+          if (
+            node.nodeType === Node.ELEMENT_NODE &&
+            (node.matches('article[data-testid="tweet"]') ||
+              node.querySelector('article[data-testid="tweet"]'))
+          ) {
+            shouldProcess = true;
+          }
+        });
+      } else if (mutation.type === "attributes") {
+        shouldProcess = true;
+      }
+    });
+
+    if (shouldProcess) {
+      processTweets();
     }
   });
 
-  if (shouldProcess) {
-    processTweets();
-  }
-});
+  // observe document
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    characterData: false,
+  });
 
-// observe document
-observer.observe(document.body, {
-  childList: true,
-  subtree: true,
-  attributes: true,
-  characterData: false,
-});
-window.addEventListener("scroll", processTweets);
+  window.addEventListener("scroll", processTweets);
+}
 
-console.log("Content script loaded successfully");
+initializeExtension();
+window.addEventListener("popstate", initializeExtension);
+window.addEventListener("pushstate", initializeExtension);
+window.addEventListener("replacestate", initializeExtension);
 
 function removeTweet(tweet, id) {
   tweet.style.transition = "opacity 0.3s ease-out";
