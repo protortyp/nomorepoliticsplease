@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>./no_more_politics_please.sh</title>
+    <style>
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        font-family: "Courier New", monospace;
+        background-color: #000;
+        color: #00ff00;
+        height: 100vh;
+        overflow: hidden;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1rem;
+        position: relative;
+        z-index: 1;
+      }
+      header {
+        text-align: center;
+        padding: 1rem 0;
+      }
+      h1 {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 0 5px #00ff00;
+      }
+      .tagline {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+      .terminal {
+        border: 1px solid #00ff00;
+        padding: 1rem;
+        background-color: rgba(0, 0, 0, 0.7);
+        box-shadow: 0 0 10px #00ff00;
+      }
+      .command {
+        margin-bottom: 1rem;
+      }
+      .command::before {
+        content: "$ ";
+        color: #00ff00;
+      }
+      .output {
+        margin-left: 1rem;
+      }
+      .cta {
+        text-align: center;
+        margin-top: 2rem;
+      }
+      .cta-button {
+        background: #000;
+        color: #00ff00;
+        padding: 0.5rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #00ff00;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        animation: pulse 2s infinite;
+      }
+      .cta-button:hover {
+        background: #00ff00;
+        color: #000;
+      }
+      .matrix-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+      }
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+        }
+      }
+      .privacy-policy {
+        margin-top: 2rem;
+        border: 1px solid #00ff00;
+        padding: 1rem;
+        background-color: rgba(0, 0, 0, 0.7);
+      }
+      .privacy-policy summary {
+        cursor: pointer;
+        outline: none;
+      }
+      .privacy-policy summary::-webkit-details-marker {
+        display: none;
+      }
+      .privacy-policy summary::before {
+        /* content: "▶ "; */
+        color: #00ff00;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+    <div class="container">
+      <header>
+        <h1>No More Politics Please</h1>
+        <p class="tagline">Hack the system, remove the noise</p>
+      </header>
+      <main>
+        <div class="terminal">
+          <div class="command">./activate_bs_filtering.sh</div>
+          <div class="output">Initializing bullshit filter...</div>
+          <div class="output">Political content detection: ACTIVE</div>
+          <div class="command">./enable_votes.sh</div>
+          <div class="output">User voting activated.</div>
+          <div class="output">Tailoring content filter: COMPLETE</div>
+          <div class="command">./deploy_cross_platform.sh</div>
+          <div class="output">Deploying to X...</div>
+          <div class="output">Deployment status: SUCCESS</div>
+        </div>
+        <div class="cta">
+          <a
+            href="https://github.com/protortyp/nomorepoliticsplease"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <button class="cta-button">INITIATE EXTENSION DOWNLOAD</button>
+          </a>
+        </div>
+        <details class="privacy-policy">
+          <summary>Privacy Policy</summary>
+          <p>
+            We respect your privacy. This extension does not collect or store
+            any personal information. It only interacts with the content on X
+            (formerly Twitter) to filter out political content based on
+            community votes. No data is shared with third parties. For more
+            information, please visit our
+            <a
+              href="https://github.com/protortyp/nomorepoliticsplease"
+              target="_blank"
+              rel="noopener noreferrer"
+              style="color: inherit; font-weight: bold;"
+              >GitHub repository</a
+            >.
+          </p>
+          </p>
+        </details>
+      </main>
+    </div>
+    <script>
+      const canvas = document.getElementById("matrix");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const katakana =
+        "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+      const latin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      const nums = "0123456789";
+
+      const alphabet = katakana + latin + nums;
+
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+
+      const rainDrops = [];
+
+      for (let x = 0; x < columns; x++) {
+        rainDrops[x] = 1;
+      }
+
+      const draw = () => {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = "#0F0";
+        ctx.font = fontSize + "px monospace";
+
+        for (let i = 0; i < rainDrops.length; i++) {
+          const text = alphabet.charAt(
+            Math.floor(Math.random() * alphabet.length)
+          );
+          ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+          if (
+            rainDrops[i] * fontSize > canvas.height &&
+            Math.random() > 0.975
+          ) {
+            rainDrops[i] = 0;
+          }
+          rainDrops[i]++;
+        }
+      };
+
+      setInterval(draw, 30);
+
+      // Resize canvas when window is resized
+      window.addEventListener("resize", () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      });
+    </script>
+  </body>
+</html>

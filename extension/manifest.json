@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "No more politics please",
+  "version": "0.1.0",
+  "description": "Filters out political content on X based on community votes, allowing users to customize their feed",
+  "homepage_url": "https://nomorepoliticsplease.com",
+  "permissions": ["activeTab", "storage"],
+  "host_permissions": [
+    "https://*.twitter.com/*",
+    "https://twitter.com/*",
+    "https://x.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.twitter.com/*",
+        "https://twitter.com/*",
+        "https://x.com/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "icons": {
+    "16": "logo16.png",
+    "48": "logo48.png",
+    "128": "logo128.png",
+    "256": "logo256.png"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}
