@@ -15,15 +15,14 @@ async function checkTweetId(id) {
 }
 
 const processedTweetIds = new Set();
-const removedTweetIds = new Set(
-  JSON.parse(localStorage.getItem("removedTweetIds") || "[]")
+const collapsedTweetIds = new Set(
+  JSON.parse(localStorage.getItem("collapsedTweetIds") || "[]")
 );
 
 async function processTweets() {
   const tweetElements = document.querySelectorAll(
     'article[data-testid="tweet"]'
   );
-  console.log(`Found ${tweetElements.length} tweets`);
 
   for (const tweet of tweetElements) {
     const tweetLink = tweet.querySelector('a[href*="/status/"]');
@@ -32,12 +31,12 @@ async function processTweets() {
       const match = href.match(/\/status\/(\d+)/);
       if (match) {
         const id = match[1];
-        // Check if we've already processed this tweet or if it's in the removed list
-        if (!processedTweetIds.has(id) && !removedTweetIds.has(id)) {
+        // check if we've already processed this tweet or if it's in the collapsed list
+        if (!processedTweetIds.has(id)) {
           try {
             const isInDatabase = await checkTweetId(id);
-            if (isInDatabase) {
-              removeTweet(tweet, id);
+            if (isInDatabase || collapsedTweetIds.has(id)) {
+              collapseTweet(tweet, id);
             } else {
               addThumbsDownButton(tweet, id);
             }
@@ -45,22 +44,19 @@ async function processTweets() {
             console.error(`Error processing tweet ${id}:`, error);
           }
           processedTweetIds.add(id);
-        } else if (removedTweetIds.has(id)) {
-          removeTweet(tweet, id);
         }
       }
     }
   }
-  console.log("Finished processing tweets");
 }
 
-// Function to check if tweets are loaded
+// function to check if tweets are loaded
 function areTweetsLoaded() {
   return document.querySelectorAll('article[data-testid="tweet"]').length > 0;
 }
 
-// Function to wait for tweets to load
-function waitForTweetsToLoad(callback, maxAttempts = 10, interval = 1000) {
+// function to wait for tweets to load
+function waitForTweetsToLoad(callback, maxAttempts = 20, interval = 1000) {
   let attempts = 0;
 
   function checkTweets() {
@@ -120,20 +116,109 @@ window.addEventListener("popstate", initializeExtension);
 window.addEventListener("pushstate", initializeExtension);
 window.addEventListener("replacestate", initializeExtension);
 
-function removeTweet(tweet, id) {
-  tweet.style.transition = "opacity 0.3s ease-out";
-  tweet.style.opacity = "0";
-  setTimeout(() => tweet.remove(), 300);
+function collapseTweet(tweet, id) {
+  console.log("collapse tweet!");
+  if (!tweet.classList.contains("collapsed-tweet")) {
+    tweet.classList.add("collapsed-tweet");
 
-  removedTweetIds.add(id);
-  localStorage.setItem("removedTweetIds", JSON.stringify([...removedTweetIds]));
+    // store the original content
+    const tweetContent = tweet.querySelector('[data-testid="tweetText"]');
+    if (!tweetContent) return;
+
+    const originalContent = tweet.innerHTML;
+
+    // check if a collapse banner already exists
+    if (!tweet.querySelector(".collapse-banner")) {
+      // create collapse banner
+      const collapseBanner = document.createElement("div");
+      collapseBanner.className = "collapse-banner";
+      collapseBanner.style.cssText = `display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border: 2px solid rgb(22, 24, 28);
+        border-radius: 16px;
+        font-size: 15px;
+        line-height: 20px;
+        color: rgb(247, 249, 249);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        width: 100%;
+        box-sizing: border-box;
+        margin-top: 8px;`;
+
+      const bannerText = document.createElement("span");
+      bannerText.textContent =
+        "This Tweet was flagged as potentially political by the community";
+      bannerText.style.cssText = `flex-grow: 1;
+        text-align: left;`;
+      collapseBanner.appendChild(bannerText);
+
+      const viewButton = document.createElement("button");
+      viewButton.textContent = "View";
+      viewButton.style.cssText = `background-color: transparent;
+        border: 1px solid rgb(83, 100, 113);
+        border-radius: 9999px;
+        padding: 0 16px;
+        height: 32px;
+        color: rgb(239, 243, 244);
+        font-weight: 700;
+        cursor: pointer;
+        margin-left: 16px;`;
+      collapseBanner.appendChild(viewButton);
+
+      // hide the content below the banner, including retweets
+      const contentToHide = tweet.querySelectorAll(
+        '[data-testid="tweetText"], [data-testid="card.wrapper"], [data-testid="tweetPhoto"], [data-testid="tweetVideo"], [data-testid="socialContext"]'
+      );
+      contentToHide.forEach((element) => {
+        element.style.display = "none";
+      });
+
+      // hide nested retweets
+      const retweetContainers = tweet.querySelectorAll(
+        'div[data-testid="tweet"]'
+      );
+      retweetContainers.forEach((container) => {
+        container.style.display = "none";
+      });
+
+      // hide quoted tweets
+      const quotedTweetContainers = tweet.querySelectorAll(
+        "div[aria-labelledby]"
+      );
+      quotedTweetContainers.forEach((container) => {
+        container.style.display = "none";
+      });
+
+      // insert the collapse banner after the user information
+      const userInfo = tweet.querySelector('[data-testid="User-Name"]');
+      if (userInfo && userInfo.parentNode) {
+        userInfo.parentNode.insertBefore(collapseBanner, userInfo.nextSibling);
+      } else {
+        tweet.insertBefore(collapseBanner, tweet.firstChild);
+      }
+
+      // add event listener to view button
+      viewButton.addEventListener("click", (e) => {
+        e.stopPropagation();
+        tweet.innerHTML = originalContent;
+        tweet.classList.remove("collapsed-tweet");
+      });
+    }
+  }
+
+  collapsedTweetIds.add(id);
+  localStorage.setItem(
+    "collapsedTweetIds",
+    JSON.stringify([...collapsedTweetIds])
+  );
 }
 
 function addThumbsDownButton(tweet, id) {
   const button = document.createElement("button");
   button.innerHTML = "👎";
   button.className = "thumbs-down-button";
-  button.title = "Remove political tweet";
+  button.title = "Collapse political tweet";
   button.style.cssText = `
     position: absolute;
     top: 8px;
@@ -142,7 +227,7 @@ function addThumbsDownButton(tweet, id) {
     border: none;
     font-size: 18px;
     cursor: pointer;
-    z-index: 1000;
+    z-index: 1001;
     opacity: 0.7;
     transition: opacity 0.2s ease-in-out;
   `;
@@ -161,7 +246,12 @@ function addThumbsDownButton(tweet, id) {
     try {
       await addTweetToDatabase(id);
       console.log(`Added tweet ${id} to database`);
-      removeTweet(tweet, id);
+      collapseTweet(tweet, id);
+      try {
+        tweet.removeChild(button);
+      } catch (error) {
+        console.error("Error removing thumbs down button:", error);
+      }
     } catch (error) {
       console.error(`Error adding tweet ${id} to database:`, error);
       button.innerHTML = "❌";
