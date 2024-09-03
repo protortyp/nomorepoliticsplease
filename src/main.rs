@@ -64,6 +64,14 @@ static CACHED_INDEX: Lazy<Result<String, AppError>> = Lazy::new(|| {
         .map(|index_html| String::from_utf8_lossy(index_html.data.as_ref()).to_string())
 });
 
+static CACHED_PRIVACY_POLICY: Lazy<Result<String, AppError>> = Lazy::new(|| {
+    Asset::get("privacy-policy.html")
+        .ok_or_else(|| AppError::AssetNotFound("privacy-policy-mini.html".to_string()))
+        .map(|privacy_policy_html| {
+            String::from_utf8_lossy(privacy_policy_html.data.as_ref()).to_string()
+        })
+});
+
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
     let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| "redis://127.0.0.1/".to_string());
@@ -90,6 +98,7 @@ async fn main() -> Result<(), AppError> {
     let app = Router::new()
         .nest("/api", api_routes)
         .route("/", get(serve_index))
+        .route("/privacy-policy", get(serve_privacy_policy))
         .layer(cors);
 
     println!("Server listening on port 3000");
@@ -127,6 +136,15 @@ async fn health_check() -> StatusCode {
 async fn serve_index() -> Result<Html<String>, AppError> {
     Ok(Html(
         CACHED_INDEX
+            .as_ref()
+            .map_err(|e| AppError::AssetNotFound(e.to_string()))?
+            .clone(),
+    ))
+}
+
+async fn serve_privacy_policy() -> Result<Html<String>, AppError> {
+    Ok(Html(
+        CACHED_PRIVACY_POLICY
             .as_ref()
             .map_err(|e| AppError::AssetNotFound(e.to_string()))?
             .clone(),
