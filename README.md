@@ -1,6 +1,8 @@
 # [./no_more_politics_please.sh](https://nomorepoliticsplease.com)
 
-![Chrome Web Store Status](https://img.shields.io/badge/Chrome%20Web%20Store-Under%20Review-yellow)
+![Chrome Web Store Status](https://img.shields.io/badge/Chrome%20Web%20Store-Published-success)
+
+[![Download No More Politics Please for Chrome](https://storage.googleapis.com/web-dev-uploads/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/tbyBjqi7Zu733AAKA5n4.png)](https://chromewebstore.google.com/detail/no-more-politics-please/aclofglkgjbabgimkgdnaajcpcdkgnib)
 
 ## Hack the system, remove the noise
 
@@ -21,6 +23,14 @@ Are you tired of endless political debates cluttering your X feed? Say goodbye t
 4. **Personalization**: Even if a tweet doesn't reach the community threshold, it will always be hidden for you if you've downvoted it, thanks to your browser's local storage.
 
 ### Quick Start
+
+1. Visit the [Chrome Web Store](https://chromewebstore.google.com/detail/no-more-politics-please/aclofglkgjbabgimkgdnaajcpcdkgnib) to install the extension.
+2. Click "Add to Chrome" to install No More Politics Please.
+3. Once installed, visit X and start enjoying a politics-free experience!
+4. Help keep X clean by voting on political content you encounter.
+5. Spread the word! Share this extension with friends who also want a cleaner, politics-free X experience.
+
+### Manual Installation (for devs)
 
 1. Clone the project:
    ```
