@@ -79,10 +79,15 @@ async fn main() -> Result<(), AppError> {
     let state = Arc::new(Mutex::new(AppState { redis_client }));
     let cors = CorsLayer::new()
         .allow_origin([
+            // DEV extensions
             "chrome-extension://pfodojlcgdhedjakbpaomhdogfgkeedj"
                 .parse::<HeaderValue>()
                 .unwrap(),
             "chrome-extension://lbcghcijpkdbbbdlcdcgblmbbajoeigb"
+                .parse::<HeaderValue>()
+                .unwrap(),
+            // Live extension
+            "chrome-extension://aclofglkgjbabgimkgdnaajcpcdkgnib"
                 .parse::<HeaderValue>()
                 .unwrap(),
         ])
